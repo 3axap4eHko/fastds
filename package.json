@@ -1,0 +1,46 @@
+{
+  "name": "fastds",
+  "description": "Fast, Zero-Dependency, TypeScript-based data structures for high-performance applications.",
+  "version": "0.0.0",
+  "type": "module",
+  "types": "build/index.d.ts",
+  "main": "build/index.cjs",
+  "module": "build/index.js",
+  "exports": {
+    "require": "./build/index.cjs",
+    "import": "./build/index.js"
+  },
+  "files": [
+    "build",
+    "src/index.ts",
+    "src/ring-buffer.ts"
+  ],
+  "scripts": {
+    "build": "rm -rf build && inop -p src build -i *.d.ts -i __tests__ -i *.tmp.ts && tsc --declaration --emitDeclarationOnly",
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+    "bench": "overtake src/__bench__/*",
+    "docs:build": "echo documentation"
+  },
+  "keywords": [
+    "fast",
+    "data",
+    "structures",
+    "queue",
+    "denque",
+    "buffer",
+    "circular"
+  ],
+  "author": "Ivan Zakharchanka (3axap4eHko) <3axap4ehko@gmail.com>",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.10.0",
+  "devDependencies": {
+    "@swc/jest": "^0.2.38",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.21",
+    "denque": "^2.1.0",
+    "inop": "^0.7.8",
+    "jest": "^29.7.0",
+    "overtake": "1.0.0-rc.2",
+    "typescript": "^5.8.3"
+  }
+}
