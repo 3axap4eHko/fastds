@@ -1,5 +1,11 @@
 # FASTds
 
+[![Coverage Status][codecov-image]][codecov-url]
+[![Github Build Status][github-image]][github-url]
+[![NPM version][npm-image]][npm-url]
+[![Downloads][downloads-image]][npm-url]
+[![Snyk][snyk-image]][snyk-url]
+
 Fast, Zero-Dependency, TypeScript-based data structures for high-performance applications.
 
 ## Why FastDS?
@@ -64,4 +70,14 @@ ring x 1,831 ops/sec ±0.71% (96 runs sampled)
 
 License [Apache-2.0 License](./LICENSE)
 Copyright (c) 2025 Ivan Zakharchanka
+
+[npm-url]: https://www.npmjs.com/package/fastds
+[downloads-image]: https://img.shields.io/npm/dw/fastds.svg?maxAge=43200
+[npm-image]: https://img.shields.io/npm/v/fastds.svg?maxAge=43200
+[github-url]: https://github.com/3axap4eHko/fastds/actions
+[github-image]: https://github.com/3axap4eHko/fastds/actions/workflows/build.yml/badge.svg?branch=master
+[codecov-url]: https://codecov.io/gh/3axap4eHko/fastds
+[codecov-image]: https://codecov.io/gh/3axap4eHko/fastds/branch/master/graph/badge.svg?maxAge=43200
+[snyk-url]: https://snyk.io/test/npm/fastds/latest
+[snyk-image]: https://snyk.io/test/github/3axap4eHko/fastds/badge.svg?maxAge=43200
 
