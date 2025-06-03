@@ -16,7 +16,7 @@
     "src/ring-buffer.ts"
   ],
   "scripts": {
-    "build": "rm -rf build && inop -p src build -i *.d.ts -i __tests__ -i *.tmp.ts && tsc --declaration --emitDeclarationOnly",
+    "build": "rm -rf build && inop -p src build -i *.d.ts -i __bench__ -i __tests__ -i *.tmp.ts && tsc --declaration --emitDeclarationOnly",
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
     "bench": "overtake src/__bench__/*",
     "docs:build": "echo documentation"
@@ -36,6 +36,7 @@
     "type": "git",
     "url": "git+https://github.com/3axap4eHko/fastds.git"
   },
+  "packageManager": "pnpm@10.10.0",
   "devDependencies": {
     "@swc/jest": "^0.2.38",
     "@types/jest": "^29.5.14",
@@ -45,6 +46,5 @@
     "jest": "^29.7.0",
     "overtake": "1.0.0-rc.2",
     "typescript": "^5.8.3"
-  },
-  "packageManager": "pnpm@10.10.0"
+  }
 }

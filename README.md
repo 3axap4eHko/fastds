@@ -1,9 +1,9 @@
 # FASTds
 
-[![Coverage Status][codecov-image]][codecov-url]
 [![Github Build Status][github-image]][github-url]
 [![NPM version][npm-image]][npm-url]
 [![Downloads][downloads-image]][npm-url]
+[![Coverage Status][codecov-image]][codecov-url]
 [![Snyk][snyk-image]][snyk-url]
 
 Fast, Zero-Dependency, TypeScript-based data structures for high-performance applications.
@@ -14,7 +14,7 @@ Modern JavaScript applications demand performance, especially when handling larg
 Built with TypeScript and modern JavaScript features, FastDS provides the performance of low-level implementations with the convenience and safety of high-level APIs.
 
 ## Roadmap
- - RingBuffer
+ - Add documentation
  - Binary Search Buffer
  - Binary Tree
  - BTree

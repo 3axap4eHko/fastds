@@ -382,9 +382,25 @@ export class RingBuffer<T> {
     return this.#buffer[offset];
   }
 
-
   has(value: T): boolean {
     return this.indexOf(value) !== -1;
+  }
+
+  insertOne(index: number, value: T): number {
+    this.allocate(index, 1);
+    this.#buffer[(this.#head + index) & this.#mask] = value;
+    return index;
+  }
+
+  insert(index: number, values: T[]): number {
+    const length = values.length;
+    const writeBase = this.#head + index;
+    this.allocate(index, length);
+    for (let i = 0; i < length; i++) {
+      this.#buffer[(writeBase + i) & this.#mask] = values[i];
+    }
+
+    return index;
   }
 
   removeOne(index: number): number {
@@ -488,38 +504,22 @@ export class RingBuffer<T> {
   }
 
   iter(): IteratorObject<T, void, unknown> {
-    return Iterator.from({
-      [Symbol.iterator]: () => {
-        const buffer = this.#buffer;
-        let idx = this.#head;
-        return {
-          next: (): IteratorResult<T> => {
-            if (idx >= this.#head + this.#length) {
-              return { done: true, value: undefined };
-            }
-            const offset = idx++ & this.#mask;
-            const value = buffer[offset]!;
-            return { done: false, value };
-          },
-        };
-      },
-    });
+    return Iterator.from(this[Symbol.iterator]());
   }
 
   [Symbol.iterator](): Iterator<T, void, unknown> {
-    return Iterator.from({
-      [Symbol.iterator]: () => {
-        return {
-          next: (): IteratorResult<T> => {
-            if (this.#length === 0) {
-              return { done: true, value: undefined };
-            }
-            const value = this.shift()!;
-            return { done: false, value };
-          },
-        };
+    const buffer = this.#buffer;
+    let idx = this.#head;
+    return {
+      next: (): IteratorResult<T> => {
+        if (idx >= this.#head + this.#length) {
+          return { done: true, value: undefined };
+        }
+        const offset = idx++ & this.#mask;
+        const value = buffer[offset]!;
+        return { done: false, value };
       },
-    });
+    };
   }
 }
 

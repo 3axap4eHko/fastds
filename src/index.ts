@@ -1,2 +1,3 @@
-export { RingBuffer as Ring } from './ring-buffer.js';
+export { BinarySearchArray } from './binary-search.js';
+export { RingBuffer } from './ring-buffer.js';
 
