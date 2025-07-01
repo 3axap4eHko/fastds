@@ -13,7 +13,7 @@ export class RingBuffer<T> {
 
   static from<T>(values: T[]): RingBuffer<T> {
     const n = values.length;
-    const ring = new RingBuffer<T>(n);
+    const ring = new RingBuffer<T>(n + 1);
     for (let i = 0; i < n; i++) {
       ring.#buffer[i] = values[i];
     }
@@ -27,11 +27,10 @@ export class RingBuffer<T> {
   readonly [Symbol.toStringTag] = 'RingBuffer';
 
   constructor(capacity: number = DEFAULT_CAPACITY) {
-    const size = Math.max(1 << (32 - Math.clz32(capacity)), DEFAULT_CAPACITY);
+    const size = Math.max(1 << (32 - Math.clz32(capacity - 1)), DEFAULT_CAPACITY);
     this.#buffer = new Array<T>(size);
     this.#mask = size - 1;
   }
-
 
   get capacity() {
     return this.#mask + 1;
@@ -57,6 +56,41 @@ export class RingBuffer<T> {
     return (this.#tail + index) & this.#mask;
   }
 
+  resize(capacity: number): boolean {
+    const buffer = this.#buffer;
+    const bufferLength = buffer.length;
+    if (bufferLength > capacity && bufferLength >> 1 < capacity) {
+      return false;
+    }
+    const size = Math.max(1 << (32 - Math.clz32(capacity - 1)), DEFAULT_CAPACITY);
+    const length = this.#length;
+    if (size < length) {
+      return false;
+    }
+    const head = this.#head;
+    const prevMask = this.#mask;
+    const prevTail = this.#tail;
+
+    const nextMask = size - 1;
+    const nextTail = (head + length) & nextMask;
+
+    const wrapIndex = size > bufferLength ? (prevTail < head ? bufferLength - head : length) : nextTail < head ? size - head : length;
+
+    for (let i = length - 1; i >= wrapIndex; i--) {
+      const read = (head + i) & prevMask;
+      const write = (head + i) & nextMask;
+      buffer[write] = buffer[read];
+      if (read !== write) {
+        buffer[read] = undefined;
+      }
+    }
+
+    this.#buffer.length = size;
+    this.#tail = nextTail;
+    this.#mask = nextMask;
+    return true;
+  }
+
   grow(capacity: number = this.#mask + 1): void {
     const buffer = this.#buffer;
     const bufferLength = buffer.length;
@@ -68,7 +102,6 @@ export class RingBuffer<T> {
 
     const oldTail = this.#tail;
     if (oldTail < this.#head) {
-      const buffer = this.#buffer;
       for (let i = 0; i < oldTail; i++) {
         buffer[bufferLength + i] = buffer[i];
       }
@@ -80,9 +113,12 @@ export class RingBuffer<T> {
 
   allocate(index: number, count: number): boolean {
     const prevLength = this.#length;
-    if (index < 0 || index > prevLength || count <= 0) {
+    if (index < 0 || count <= 0) {
       return false;
     }
+
+    // Clamp index to valid range, like Array.splice()
+    index = Math.min(index, prevLength);
 
     const buffer = this.#buffer;
     const head = this.#head;
@@ -321,6 +357,116 @@ export class RingBuffer<T> {
     return true;
   }
 
+  set(index: number, values: T[], insert = false) {
+    const length = this.#length;
+    if (index < 0 || index > length) {
+      return false;
+    }
+    const count = values.length;
+    if (insert) {
+      this.allocate(index, count);
+    } else {
+      const extra = Math.max(index + values.length - length, 0);
+      if (extra > 0) {
+        this.allocate(length, extra);
+      }
+    }
+    const buffer = this.#buffer;
+    const mask = this.#mask;
+    const baseWrite = this.#head + index;
+    for (let i = 0; i < count; i++) {
+      buffer[(baseWrite + i) & mask] = values[i];
+    }
+    return true;
+  }
+
+  setOne(index: number, value: T, insert = false) {
+    const length = this.#length;
+    if (index < 0 || index > length) {
+      return false;
+    }
+    if (insert) {
+      this.allocate(index, 1);
+    } else {
+      const extra = Math.max(index + 1 - length, 0);
+      if (extra > 0) {
+        this.allocate(length, extra);
+      }
+    }
+    const buffer = this.#buffer;
+    const mask = this.#mask;
+    buffer[(this.#head + index) & mask] = value;
+
+    return true;
+  }
+
+  slice(start: number = 0, end: number = this.#length): T[] {
+    const length = this.#length;
+    const buffer = this.#buffer;
+    const head = this.#head;
+    const tail = this.#tail;
+    const mask = this.#mask;
+
+    const actualStart = start < 0 ? Math.max(length + start, 0) : Math.min(start, length);
+    const actualEnd = end < 0 ? Math.max(length + end, 0) : Math.min(end, length);
+
+    if (head <= tail) {
+      return this.#buffer.slice((head + actualStart) & mask, (head + actualEnd) & mask) as T[];
+    }
+
+    const size = Math.max(actualEnd - actualStart, 0);
+    const result = new Array<T>(size);
+    for (let i = 0; i < size; i++) {
+      result[i] = buffer[(head + actualStart + i) & mask]!;
+    }
+    return result;
+  }
+
+  removeOne(index: number): number {
+    const length = this.#length;
+    if (index < 0 || index >= length) {
+      return -1;
+    }
+    const buffer = this.#buffer;
+    const mask = this.#mask;
+    const head = this.#head;
+
+    const leftMoveCount = index;
+    const rightMoveCount = length - index;
+
+    if (leftMoveCount < rightMoveCount) {
+      for (let i = index; i > 0; i--) {
+        buffer[(head + i) & mask] = buffer[(head + i - 1) & mask];
+      }
+      buffer[head] = undefined;
+      this.#head = (head + 1) & mask;
+    } else {
+      for (let i = index; i < length - 1; i++) {
+        buffer[(head + i) & mask] = buffer[(head + i + 1) & mask];
+      }
+      const tail = (head + length - 1) & mask;
+      buffer[tail] = undefined;
+      this.#tail = tail;
+    }
+    this.#length = length - 1;
+
+    return index;
+  }
+
+  removeFirst(value: T, index: number = 0): number {
+    const foundIndex = this.indexOf(value, index);
+    if (foundIndex === -1) {
+      return -1;
+    }
+    return this.removeOne(foundIndex);
+  }
+
+  remove(index: number, count: number): T[] {
+    const result = this.slice(index, index + count);
+    this.deallocate(index, count);
+    return result;
+  }
+
   push(value: T) {
     const tail = this.getTailOffset(1);
     if (tail === this.#head) {
@@ -386,68 +532,6 @@ export class RingBuffer<T> {
     return this.indexOf(value) !== -1;
   }
 
-  insertOne(index: number, value: T): number {
-    this.allocate(index, 1);
-    this.#buffer[(this.#head + index) & this.#mask] = value;
-    return index;
-  }
-
-  insert(index: number, values: T[]): number {
-    const length = values.length;
-    const writeBase = this.#head + index;
-    this.allocate(index, length);
-    for (let i = 0; i < length; i++) {
-      this.#buffer[(writeBase + i) & this.#mask] = values[i];
-    }
-
-    return index;
-  }
-
-  removeOne(index: number): number {
-    const length = this.#length;
-    if (index < 0 || index >= length) {
-      return -1;
-    }
-    const buffer = this.#buffer;
-    const mask = this.#mask;
-    const head = this.#head;
-
-    const leftMoveCount = index;
-    const rightMoveCount = length - index;
-
-    if (leftMoveCount < rightMoveCount) {
-      for (let i = index; i > 0; i--) {
-        buffer[(head + i) & mask] = buffer[(head + i - 1) & mask];
-      }
-      buffer[head] = undefined;
-      this.#head = (head + 1) & mask;
-    } else {
-      for (let i = index; i < length - 1; i++) {
-        buffer[(head + i) & mask] = buffer[(head + i + 1) & mask];
-      }
-      const tail = (head + length - 1) & mask;
-      buffer[tail] = undefined;
-      this.#tail = tail;
-    }
-    this.#length = length - 1;
-
-    return index;
-  }
-
-  removeFirst(value: T, index: number = 0): number {
-    const foundIndex = this.indexOf(value, index);
-    if (foundIndex === -1) {
-      return -1;
-    }
-    return this.removeOne(foundIndex);
-  }
-
-  remove(index: number, count: number): T[] {
-    const result = this.slice(index, count);
-    this.deallocate(index, count);
-    return result;
-  }
-
   clear(): this {
     this.#buffer.length = 0;
     this.#buffer.length = DEFAULT_CAPACITY;
@@ -456,31 +540,6 @@ export class RingBuffer<T> {
     this.#length = 0;
     this.#mask = DEFAULT_CAPACITY - 1;
     return this;
-  }
-
-  slice(start: number = 0, end: number = this.#length): T[] {
-    const length = this.#length;
-    const buffer = this.#buffer;
-    const head = this.#head;
-    const tail = this.#tail;
-    const mask = this.#mask;
-
-    const actualStart = start < 0 ? Math.max(length + start, 0) : Math.min(start, length);
-    const actualEnd = end < 0 ? Math.max(length + end, 0) : Math.min(end, length);
-
-    if (head <= tail) {
-      return this.#buffer.slice(
-        (head + actualStart) & mask,
-        (head + actualEnd) & mask,
-      ) as T[];
-    }
-
-    const size = Math.max(actualEnd - actualStart, 0);
-    const result = new Array<T>(size);
-    for (let i = 0; i < size; i++) {
-      result[i] = buffer[(head + actualStart + i) & mask]!;
-    }
-    return result;
   }
 
   toArray(): T[] {
@@ -522,5 +581,3 @@ export class RingBuffer<T> {
     };
   }
 }
-
-

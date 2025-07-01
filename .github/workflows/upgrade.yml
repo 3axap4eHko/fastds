@@ -41,6 +41,6 @@ jobs:
       - name: Test published 🔩
         run: |
           pnpm init
-          pnpm add evnty
+          pnpm add fastds
         shell: bash
 

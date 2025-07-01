@@ -24,11 +24,14 @@ export class BinarySearchArray<T> implements Iterable<T, void, unknown> {
   }
 
   lowerBound(value: T): number {
+    const length = this.#buffer.length;
+    if (length === 0) return 0;
+
     let left = 0;
-    let right = this.#buffer.length;
+    let right = length;
 
     while (left < right) {
-      const mid = Math.floor((left + right) / 2);
+      const mid = (left + right) >>> 1;
       if (this.#comparator(this.#buffer.peekAt(mid)!, value) < 0) {
         left = mid + 1;
       } else {
@@ -40,11 +43,14 @@ export class BinarySearchArray<T> implements Iterable<T, void, unknown> {
   }
 
   upperBound(value: T): number {
+    const length = this.#buffer.length;
+    if (length === 0) return 0;
+
     let left = 0;
-    let right = this.#buffer.length;
+    let right = length;
 
     while (left < right) {
-      const mid = Math.floor((left + right) / 2);
+      const mid = (left + right) >>> 1;
       if (this.#comparator(this.#buffer.peekAt(mid)!, value) <= 0) {
         left = mid + 1;
       } else {
@@ -56,11 +62,14 @@ export class BinarySearchArray<T> implements Iterable<T, void, unknown> {
   }
 
   indexOf(value: T, index = 0) {
+    const length = this.#buffer.length;
+    if (length === 0 || index >= length) return -1;
+
     let left = index;
-    let right = this.#buffer.length - 1;
+    let right = length - 1;
 
     while (left <= right) {
-      const mid = Math.floor((left + right) / 2);
+      const mid = (left + right) >>> 1;
       const cmp = this.#comparator(this.#buffer.peekAt(mid)!, value);
 
       if (cmp === 0) {
@@ -81,7 +90,7 @@ export class BinarySearchArray<T> implements Iterable<T, void, unknown> {
 
   insert(value: T) {
     const index = this.lowerBound(value);
-    this.#buffer.insertOne(index, value);
+    this.#buffer.setOne(index, value, true);
 
     return index;
   }
@@ -109,4 +118,3 @@ export class BinarySearchArray<T> implements Iterable<T, void, unknown> {
     return this.#buffer[Symbol.iterator]();
   }
 }
-

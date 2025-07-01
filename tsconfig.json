@@ -7,17 +7,11 @@
     "esModuleInterop": true,
     "allowJs": true,
     "moduleResolution": "NodeNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext"],
     "rootDir": "src",
-    "outDir": "build"
+    "outDir": "build",
+    "skipLibCheck": true
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/__tests__",
-    "**/__bench__",
-    "node_modules",
-    "**/*.tmp.ts"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "**/__tests__", "**/*.tmp.ts"]
 }
