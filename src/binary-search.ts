@@ -27,12 +27,15 @@ export class BinarySearchArray<T> implements Iterable<T, void, unknown> {
     const length = this.#buffer.length;
     if (length === 0) return 0;
 
+    const buffer = this.#buffer;
+    const comparator = this.#comparator;
     let left = 0;
     let right = length;
 
     while (left < right) {
       const mid = (left + right) >>> 1;
-      if (this.#comparator(this.#buffer.peekAt(mid)!, value) < 0) {
+      const midValue = buffer.peekAt(mid)!;
+      if (comparator(midValue, value) < 0) {
         left = mid + 1;
       } else {
         right = mid;
@@ -46,12 +49,15 @@ export class BinarySearchArray<T> implements Iterable<T, void, unknown> {
     const length = this.#buffer.length;
     if (length === 0) return 0;
 
+    const buffer = this.#buffer;
+    const comparator = this.#comparator;
     let left = 0;
     let right = length;
 
     while (left < right) {
       const mid = (left + right) >>> 1;
-      if (this.#comparator(this.#buffer.peekAt(mid)!, value) <= 0) {
+      const midValue = buffer.peekAt(mid)!;
+      if (comparator(midValue, value) <= 0) {
         left = mid + 1;
       } else {
         right = mid;
@@ -65,12 +71,15 @@ export class BinarySearchArray<T> implements Iterable<T, void, unknown> {
     const length = this.#buffer.length;
     if (length === 0 || index >= length) return -1;
 
+    const buffer = this.#buffer;
+    const comparator = this.#comparator;
     let left = index;
     let right = length - 1;
 
     while (left <= right) {
       const mid = (left + right) >>> 1;
-      const cmp = this.#comparator(this.#buffer.peekAt(mid)!, value);
+      const midValue = buffer.peekAt(mid)!;
+      const cmp = comparator(midValue, value);
 
       if (cmp === 0) {
         return mid;

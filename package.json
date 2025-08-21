@@ -13,7 +13,8 @@
   "files": [
     "build",
     "src/index.ts",
-    "src/ring-buffer.ts"
+    "src/ring-buffer.ts",
+    "src/binary-search.ts"
   ],
   "scripts": {
     "build": "rm -rf build && inop -p src build -i *.d.ts -i __bench__ -i __tests__ -i *.tmp.ts && tsc --declaration --emitDeclarationOnly",
@@ -41,9 +42,8 @@
   "devDependencies": {
     "@types/node": "^22.17.2",
     "@vitest/coverage-v8": "^3.2.4",
-    "denque": "^2.1.0",
     "inop": "^0.7.8",
-    "overtake": "1.0.2",
+    "overtake": "^1.0.2",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   }

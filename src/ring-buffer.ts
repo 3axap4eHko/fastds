@@ -117,7 +117,6 @@ export class RingBuffer<T> {
       return false;
     }
 
-    // Clamp index to valid range, like Array.splice()
     index = Math.min(index, prevLength);
 
     const buffer = this.#buffer;
@@ -258,12 +257,12 @@ export class RingBuffer<T> {
       }
       return -1;
     }
+    
     const capacity = buffer.length;
     const firstSegmentLength = capacity - head;
 
     if (index < firstSegmentLength) {
-      const startOffset = head + index;
-      const result = buffer.indexOf(value, startOffset);
+      const result = buffer.indexOf(value, head + index);
       if (result !== -1) {
         return result - head;
       }
@@ -271,19 +270,12 @@ export class RingBuffer<T> {
     }
 
     if (index < length) {
-      if (tail > length / 2) {
-        const result = buffer.indexOf(value);
-        if (result !== -1 && result < tail) {
-          return firstSegmentLength + result;
-        }
-      } else {
-        for (let i = 0; i < tail; i++) {
-          if (buffer[i] === value) {
-            return firstSegmentLength + i;
-          }
-        }
+      const result = buffer.indexOf(value, 0);
+      if (result !== -1 && result < tail) {
+        return firstSegmentLength + result;
       }
     }
+    
     return -1;
   }
 
@@ -468,22 +460,27 @@ export class RingBuffer<T> {
   }
 
   push(value: T) {
-    const tail = this.getTailOffset(1);
-    if (tail === this.#head) {
+    const nextTail = (this.#tail + 1) & this.#mask;
+    if (nextTail === this.#head) {
       this.grow(this.#mask + 2);
+      this.#buffer[this.#tail] = value;
+      this.#tail = (this.#tail + 1) & this.#mask;
+    } else {
+      this.#buffer[this.#tail] = value;
+      this.#tail = nextTail;
     }
-    this.#buffer[this.#tail] = value;
-    this.#tail = this.getTailOffset(1);
     this.#length++;
     return this;
   }
 
   unshift(value: T): this {
-    const head = this.getHeadOffset(-1);
-    if (head === this.#tail) {
+    const newHead = (this.#head - 1) & this.#mask;
+    if (newHead === this.#tail) {
       this.grow(this.#mask + 2);
+      this.#head = (this.#head - 1) & this.#mask;
+    } else {
+      this.#head = newHead;
     }
-    this.#head = this.getHeadOffset(-1);
     this.#buffer[this.#head] = value;
     this.#length++;
     return this;
@@ -495,7 +492,7 @@ export class RingBuffer<T> {
     }
     const value = this.#buffer[this.#head];
     this.#buffer[this.#head] = undefined;
-    this.#head = this.getHeadOffset(1);
+    this.#head = (this.#head + 1) & this.#mask;
     this.#length--;
     return value;
   }
@@ -504,7 +501,7 @@ export class RingBuffer<T> {
     if (this.#head === this.#tail) {
       return undefined;
     }
-    this.#tail = this.getTailOffset(-1);
+    this.#tail = (this.#tail - 1) & this.#mask;
     const value = this.#buffer[this.#tail];
     this.#buffer[this.#tail] = undefined;
     this.#length--;
@@ -568,14 +565,18 @@ export class RingBuffer<T> {
 
   [Symbol.iterator](): Iterator<T, void, unknown> {
     const buffer = this.#buffer;
+    const mask = this.#mask;
+    const length = this.#length;
+    let count = 0;
     let idx = this.#head;
     return {
       next: (): IteratorResult<T> => {
-        if (idx >= this.#head + this.#length) {
+        if (count >= length) {
           return { done: true, value: undefined };
         }
-        const offset = idx++ & this.#mask;
-        const value = buffer[offset]!;
+        const value = buffer[idx]!;
+        idx = (idx + 1) & mask;
+        count++;
         return { done: false, value };
       },
     };
