@@ -42,7 +42,7 @@
   "devDependencies": {
     "@types/node": "^22.18.6",
     "@vitest/coverage-v8": "^3.2.4",
-    "inop": "^0.7.19",
+    "inop": "^0.7.20",
     "overtake": "^1.0.4",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
