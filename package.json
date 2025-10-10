@@ -38,9 +38,9 @@
     "type": "git",
     "url": "git+https://github.com/3axap4eHko/fastds.git"
   },
-  "packageManager": "pnpm@10.18.1",
+  "packageManager": "pnpm@10.18.2",
   "devDependencies": {
-    "@types/node": "^22.18.8",
+    "@types/node": "^22.18.9",
     "@vitest/coverage-v8": "^3.2.4",
     "inop": "^0.7.24",
     "overtake": "^1.0.4",
