@@ -15,8 +15,8 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/node@22.19.2))
       inop:
-        specifier: ^0.8.2
-        version: 0.8.2
+        specifier: ^0.8.3
+        version: 0.8.3
       overtake:
         specifier: ^1.1.0
         version: 1.1.0
@@ -697,8 +697,8 @@ packages:
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
 
-  inop@0.8.2:
-    resolution: {integrity: sha512-mAi/I4sjQIOASsequctqRpV5KwUuhVI8dDVgW4IY1mdx5am9kpNeA/YcQRFpe/LxSyIUXXfD8vk1L1ct4pti5w==}
+  inop@0.8.3:
+    resolution: {integrity: sha512-4h2Xny7L10HgTgocbd7al2X6PXiKqJFSDDjaa2lZV+WoeYR6+wV2mrYzcYG+gfcGIxhwAiZtFD7kljolrHXzIQ==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -1563,7 +1563,7 @@ snapshots:
 
   html-escaper@2.0.2: {}
 
-  inop@0.8.2:
+  inop@0.8.3:
     dependencies:
       '@swc/core': 1.15.3
       commander: 14.0.2
