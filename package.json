@@ -1,7 +1,7 @@
 {
   "name": "fastds",
   "description": "Fast, Zero-Dependency, TypeScript-based data structures for high-performance applications.",
-  "version": "0.0.74",
+  "version": "0.0.75",
   "type": "module",
   "types": "build/index.d.ts",
   "main": "build/index.cjs",
