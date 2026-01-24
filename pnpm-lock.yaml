@@ -18,8 +18,8 @@ importers:
         specifier: ^0.8.10
         version: 0.8.10
       overtake:
-        specifier: ^1.2.1
-        version: 1.2.1
+        specifier: ^1.3.1
+        version: 1.3.1
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -791,8 +791,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  overtake@1.2.1:
-    resolution: {integrity: sha512-3k60NYw463UFMfaMUfn97agpIdvvzuOoO91+Z7uxQYPUULiWd0nM5z5ZzgrrSXbPey/AiZaD3mLd5HbvaBvxew==}
+  overtake@1.3.1:
+    resolution: {integrity: sha512-mNbSqHEGkNVekyWixQyzzHovsmnQjRAuB6mo4BC6BW4P7njIo5x3sM1RqHWhMWsocdvhuwvhqU5V6N5/pwFVFQ==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -1657,7 +1657,7 @@ snapshots:
 
   nanoid@3.3.11: {}
 
-  overtake@1.2.1:
+  overtake@1.3.1:
     dependencies:
       '@swc/core': 1.15.8
       async: 3.2.6
